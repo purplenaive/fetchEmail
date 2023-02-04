@@ -76,8 +76,16 @@ async function fetchEmailForm(url: string, data: any) {
     },
     body: JSON.stringify(data)
   })
-    .then((response) => response.json())
-    .then((data) => data);
+    .then((response) => {
+      
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw Error("이메일 전송 요청에 실패했습니다.");
+      }
+
+    })
+    // .then((data) => data);
 
     // ============ 자동으로 고쳐준 거 ============ //
     // const response = await fetch(`${url}/api/email`, {
@@ -103,15 +111,11 @@ function Email (): React.ReactElement {
     const trimedFormData = changeArrayToObject(formData);
     const response = fetchEmailForm(url, trimedFormData); // promise를 반환함(X) => await이라 결과값을 반환함
 
-    console.log(response);
-
-    response // 그래서 then, catch로 핸들링 가능
+    response
       .then((res) => {
-        // 여기서 서버에서 내려주는 코드로 판단해서 분기 처리?
         console.log(res);
       })
       .catch((error) => {
-        // 에러가 안 잡히지 않나? 필요 없는 거 같은데
         console.error(error);
       })
 
