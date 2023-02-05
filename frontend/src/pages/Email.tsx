@@ -1,19 +1,28 @@
 import React, { useCallback } from "react";
 
 // type
-// interface EmailData {
-//   fullName: string,
-//   emailAddress: string,
-//   websites?: string,
-//   telegram?: string,
-//   skype?: string,
-//   msn?: string,
-//   message: string,
-// }
 type CommonObject = {
   [key: string]: any
-}
+};
 type FormArray = [ string, string | FormDataEntryValue];
+interface EmailData extends CommonObject {
+  fullName: string,
+  emailAddress: string,
+  websites?: string,
+  telegram?: string,
+  skype?: string,
+  msn?: string,
+  message: string,
+};
+
+/**
+ * (calculate) FormData를 [key, value] 구성의 배열로 반환합니다.
+ * @param data new FormData의 데이터
+ * @returns 
+ */
+function formDataToArray (formElement: HTMLFormElement): FormArray[] {
+  return [...new FormData(formElement).entries()];
+}
 
 /**
  * (calculate) host에 따라 url 리턴
@@ -43,7 +52,7 @@ function changeArrayToObject(data: Array<FormArray>): CommonObject {
  * @param data email data
  * @returns 
  */
-async function fetchEmailForm(url: string, data: any) {
+async function fetchEmailForm(url: string, data: CommonObject) {
   // 원래 async 안 썼음
 
   // ============ 내가 쓴 거 (1) ============ //
@@ -69,7 +78,7 @@ async function fetchEmailForm(url: string, data: any) {
   // });
 
   // ============ 내가 쓴 거 (2) ============ //
-  return await fetch(`${url}/api/email`, { // 아니 fetch가 promise를 반환한다는데 그러면 ... promise로 안 감싸도 되잖아
+  return await fetch(url, { // 아니 fetch가 promise를 반환한다는데 그러면 ... promise로 안 감싸도 되잖아
     method: "POST",
     headers: {
       "Content-Type": "application/json", // 이 형식에 따라서 body에 data의 형식이 달라져도 될 거 같은데..
@@ -83,7 +92,6 @@ async function fetchEmailForm(url: string, data: any) {
       } else {
         throw Error("이메일 전송 요청에 실패했습니다.");
       }
-
     })
     // .then((data) => data);
 
@@ -106,8 +114,8 @@ function Email (): React.ReactElement {
     event.preventDefault();
 
     const { currentTarget } = event;
-    const url = getEmailRequestUrl(window.location.host);
-    const formData = [...new FormData(currentTarget).entries()]; 
+    const url = getEmailRequestUrl(window.location.host) + "/api/email";
+    const formData = formDataToArray(currentTarget);
     const trimedFormData = changeArrayToObject(formData);
     const response = fetchEmailForm(url, trimedFormData); // promise를 반환함(X) => await이라 결과값을 반환함
 
